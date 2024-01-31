@@ -14,8 +14,8 @@ root_directory = os.getcwd()
 print("root_directory:", root_directory)
 
 # Optionally add you project folder, if you want to get specific
-# project_directory = root_directory + "/my_project_folder"
-project_directory = root_directory + "/djangoproject"
+project_folder_name = "your_project_folder"
+project_directory = root_directory + "/" + project_folder_name
 print("project_directory:", project_directory)
 
 project_file_lists = openai_directory + "/project_file_lists/"
@@ -164,11 +164,10 @@ def write_results_to_csv(file_data, output_file):
 
 
 # Optionally add you project folder, if you want to get specific
-# Get the other project folder/files
 get_project_files, total_project_word_count = traverse_directory(project_directory, exclude_patterns)
 # pprint(get_project_files)
 print("len:", len(get_project_files), "word count:", total_project_word_count)
 
 # Output to CSV
-project_output_file_name = project_file_lists + "project_directory_files.csv"
+project_output_file_name = project_file_lists + project_folder_name + "_directory_files.csv"
 write_results_to_csv(get_project_files, project_output_file_name)

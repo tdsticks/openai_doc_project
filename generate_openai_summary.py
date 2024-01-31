@@ -26,8 +26,10 @@ summary_output_path = openai_directory + '/summary_outputs'
 # print("summary_output_path:", summary_output_path)
 
 # Add any other prefix name to process the project file lists
-prefix_name = "root"
-# prefix_name = "my_test_project"
+# NOTE: I have purposefully not set up a list and loop to run many project file lists
+#   Add and comment and uncomment one at a time
+# prefix_name = "root"
+prefix_name = "your_project_folder"
 
 # Define the path for the single output file
 all_summaries_file_path = os.path.join(openai_directory, prefix_name+'_all_summaries.md')
