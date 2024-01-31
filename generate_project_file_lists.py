@@ -13,9 +13,10 @@ os.chdir("../")
 root_directory = os.getcwd()
 print("root_directory:", root_directory)
 
-# Add you project folder
-project_directory = root_directory + "my_test_project"
-# print("project_directory:", project_directory)
+# Optionally add you project folder, if you want to get specific
+# project_directory = root_directory + "/my_project_folder"
+project_directory = root_directory + "/djangoproject"
+print("project_directory:", project_directory)
 
 project_file_lists = openai_directory + "/project_file_lists/"
 # print("project_file_lists:", project_file_lists)
@@ -25,22 +26,47 @@ if not os.path.exists(project_file_lists):
     os.makedirs(project_file_lists, file_write_mode)
     print(f"    Directory created: {project_file_lists}")
 
+# TODO: Read in the .gitignore file and append to the exclude_patterns list
+
 # Patterns to exclude (can be modified as needed)
 exclude_patterns = [
-    "LICENSE", "*.rst", "*.ipynb",
-    "requirements.txt",
-    "*.pyc", "__pycache__", ".DS_Store",
-    "*.env", "*.sql", "env/", "venv/",
-    "*.github*",
-    ".git",  # Exclude everything inside .git directory
+    # General / Docs
+    "*docs*", "LICENSE", "*.rst", "*.md"
+    # MacOS
+    ".DS_Store",
+    # Python
+    "requirements.txt", ".pylintrc",
+    "*.ipynb", "*.pyc", "__pycache__",
+    "*.env", "env/", "venv/",
+    # Django
+    "*migrations*", "migrations/*",
+    "*locale*", "*test*",
+    # Database
+    "*.sql", "*.sqlite3",
+    # Git
+    ".git-blame-ignore-revs",
+    "*.github*", ".git",
     "*.gitkeep", "*.gitattributes",
-    "node_modules/", "*.sqlite3",
-    ".pylintrc", ".pre-commit-config.yaml",
-    ".editorconfig", "*locale*", "*.idea",
-    "*test*", "*docs*", "*.workspace"
+    # Node
+    "node_modules/",
+    ".pre-commit-config.yaml",
+    ".editorconfig",
+    # IDEs
+    "*.idea",
+    "*.workspace",
+    # Images
+    "*.png", "*.gif", "*.jpg", "*.jpeg",
+    "*.svg", "*.eps", "*.ico",
+    # Fonts
+    "*.ttf", "*.eot",
+    "*.woff", "*.otf",
+    # Java
+    "*.jar",
+    # Compress files
+    "*.gz", "*.zip"
 ]
 
-# Paths to exclude
+# Paths to exclude (optional)
 root_exclude_paths = [
     # project_directory,
     openai_directory,
@@ -102,6 +128,9 @@ def traverse_directory(directory, exclude_patterns, exclude_paths=None):
         for file in files:
             if not is_excluded(file, exclude_patterns, exclude_paths):
                 file_path = os.path.join(root, file)
+
+                print("file_path:", file_path)
+
                 word_count = count_words_in_file(file_path)
                 total_word_count += word_count
                 dir_files[file_path] = word_count
@@ -113,28 +142,33 @@ def write_results_to_csv(file_data, output_file):
     # print("output_file:", output_file)
     # print("file_data:", file_data)
 
-    """ Write the file data to a CSV file. """
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write("File Path, Word Count\n")  # CSV Header
-        for file_path, word_count in file_data.items():
-            if word_count > 0:
-                f.write(f"{file_path},{word_count}\n")
+    try:
+        """ Write the file data to a CSV file. """
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write("File Path, Word Count\n")  # CSV Header
+            for file_path, word_count in file_data.items():
+                if word_count > 0:
+                    f.write(f"{file_path},{word_count}\n")
+    except Exception as e:
+        print("Error - write_results_to_csv:", e)
 
 
-# Get the Django files
-get_root_files, total_root_word_count = traverse_directory(root_directory, exclude_patterns, root_exclude_paths)
+# Get the root files and folders
+# get_root_files, total_root_word_count = traverse_directory(root_directory, exclude_patterns, root_exclude_paths)
 # pprint(get_root_files)
-print("len:", len(get_root_files), "word count:", total_root_word_count)
-
-# Get the Django files
-get_project_files, total_django_word_count = traverse_directory(project_directory, exclude_patterns)
-# pprint(get_project_files)
-print("len:", len(get_project_files), "word count:", total_django_word_count)
+# print("len:", len(get_root_files), "word count:", total_root_word_count)
 
 # Output to CSV
 # root_output_file_name = project_file_lists + "root_directory_files.csv"
 # write_results_to_csv(get_root_files, root_output_file_name)
 
+
+# Optionally add you project folder, if you want to get specific
+# Get the other project folder/files
+get_project_files, total_project_word_count = traverse_directory(project_directory, exclude_patterns)
+# pprint(get_project_files)
+print("len:", len(get_project_files), "word count:", total_project_word_count)
+
 # Output to CSV
-# project_output_file_name = project_file_lists + "project_directory_files.csv"
-# write_results_to_csv(get_project_files, project_output_file_name)
+project_output_file_name = project_file_lists + "project_directory_files.csv"
+write_results_to_csv(get_project_files, project_output_file_name)
