@@ -2,6 +2,8 @@ import os
 import fnmatch
 from pprint import pprint
 
+file_write_mode = 0o755
+
 openai_directory = os.getcwd()
 print("openai_directory:", openai_directory)
 
@@ -11,12 +13,17 @@ os.chdir("../")
 root_directory = os.getcwd()
 print("root_directory:", root_directory)
 
-# Add you project folder 
+# Add you project folder
 project_directory = root_directory + "my_test_project"
 # print("project_directory:", project_directory)
 
 project_file_lists = openai_directory + "/project_file_lists/"
 # print("project_file_lists:", project_file_lists)
+
+# Create the directory if it does not exist
+if not os.path.exists(project_file_lists):
+    os.makedirs(project_file_lists, file_write_mode)
+    print(f"    Directory created: {project_file_lists}")
 
 # Patterns to exclude (can be modified as needed)
 exclude_patterns = [
@@ -35,7 +42,7 @@ exclude_patterns = [
 
 # Paths to exclude
 root_exclude_paths = [
-    project_directory,
+    # project_directory,
     openai_directory,
 ]
 
@@ -125,9 +132,9 @@ get_project_files, total_django_word_count = traverse_directory(project_director
 print("len:", len(get_project_files), "word count:", total_django_word_count)
 
 # Output to CSV
-root_output_file_name = project_file_lists + "root_directory_files.csv"
-write_results_to_csv(get_root_files, root_output_file_name)
+# root_output_file_name = project_file_lists + "root_directory_files.csv"
+# write_results_to_csv(get_root_files, root_output_file_name)
 
 # Output to CSV
-project_output_file_name = project_file_lists + "project_directory_files.csv"
-write_results_to_csv(get_project_files, project_output_file_name)
+# project_output_file_name = project_file_lists + "project_directory_files.csv"
+# write_results_to_csv(get_project_files, project_output_file_name)
