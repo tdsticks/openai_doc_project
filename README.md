@@ -22,8 +22,10 @@ The Open AI Doc Project is a tool designed to automate the documentation of soft
 
 ## Usage Instructions
 
-- Copy the `.env.example` file to `.env` and add your Open AI API key.
+- Setup a virtual environment (I prefer pyenv) using Python 3.10.0
 - Place this project in your existing project directory to analyze root and other specified project folders.
+- Install the `requirements.txt` file: `pip install -r requirements.txt`
+- Copy the `.env.example` file to `.env` and add your Open AI API key.
 - Run `generate_project_file_lists.py` from the `openai_doc_project` folder to create file paths and word counts for processing.
 - Update the `generate_openai_summary.py` prefix variable with your project file set to process. This script is designed to process one project file set at a time.
 
