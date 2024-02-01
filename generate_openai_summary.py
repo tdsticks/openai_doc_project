@@ -3,45 +3,53 @@ import csv
 import os
 import environ
 
+# Load environment variables
 env = environ.Env()
 env.read_env(".env")
 OPENAI_API_KEY = env("OPENAI_API_KEY")
 
+# File permission mode for creating directories
 file_write_mode = 0o755
 
 # Change the current working directory to root of your project
 os.chdir("../")
-
 root_directory = os.getcwd()
-# print("root_directory:", root_directory)
 
+# Change directory to the OpenAI project directory
 os.chdir("./openai_doc_project")
 
 openai_directory = os.getcwd()
 # print("openai_directory:", openai_directory)
 
+# Define paths for project file lists and summary output
 project_file_lists  = openai_directory + '/project_file_lists/'
 summary_output_path = openai_directory + '/summary_outputs'
-# print("project_file_lists:", project_file_lists)
-# print("summary_output_path:", summary_output_path)
 
 # Add any other prefix name to process the project file lists
-# NOTE: I have purposefully not set up a list and loop to run many project file lists
-#   Add and comment and uncomment one at a time
-# prefix_name = "root"
-prefix_name = "your_project_folder"
+# NOTE: I have purposefully did not set up a list and loop to
+#  run many project file lists. Add and comment and uncomment one at a time.
+prefix_name = "root"
+# prefix_name = "your_project_folder"
 
-# Define the path for the single output file
+# Define the path for the single output file containing all summaries
 all_summaries_file_path = os.path.join(openai_directory, prefix_name+'_all_summaries.md')
 # print("All summaries will be stored in:", all_summaries_file_path)
 
-# Path to your CSV file
+# Path to the CSV file containing file paths and word counts
 csv_file_path = project_file_lists + prefix_name+'_directory_files.csv'
 # print("csv_file_path:", csv_file_path)
 
 
 def read_csv(file_path):
-    """ Read file paths and word counts from a CSV file. """
+    """
+    Read file paths and word counts from a CSV file.
+
+    Args:
+        file_path (str): Path to the CSV file.
+
+    Returns:
+        list: A list of tuples containing the file path and word count.
+    """
     with open(file_path, 'r', encoding='utf-8') as file:
         reader = csv.reader(file)
         next(reader)  # Skip header
@@ -49,7 +57,15 @@ def read_csv(file_path):
 
 
 def read_file_content(file_path):
-    """ Read the content of a file. """
+    """
+    Read the content of a file.
+
+    Args:
+        file_path (str): Path to the file to read.
+
+    Returns:
+        str: The content of the file, or None if an error occurs.
+    """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             return file.read()
@@ -59,13 +75,34 @@ def read_file_content(file_path):
 
 
 def chunk_text(text, chunk_size):
-    """Yield successive chunk_size chunks from text."""
+    """
+    Yield successive chunk_size chunks from text.
+
+    Args:
+        text (str): The text to be chunked.
+        chunk_size (int): Size of each chunk in characters.
+
+    Yields:
+        str: A chunk of the text.
+    """
     for i in range(0, len(text), chunk_size):
         yield text[i:i + chunk_size]
 
 
 # Get a high-level summary of the text using OpenAI.
 def get_summary_from_openai(text, p_file_path, model="gpt-3.5-turbo", max_token_size=4096):
+    """
+    Get a high-level summary of the text using OpenAI.
+
+    Args:
+        text (str): The text to summarize.
+        p_file_path (str): Path to the file being summarized.
+        model (str): The OpenAI model to use.
+        max_token_size (int): The maximum token size for the model.
+
+    Returns:
+        str: A summary of the text.
+    """
     print(":get_summary_from_openai:")
 
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -113,7 +150,7 @@ def get_summary_from_openai(text, p_file_path, model="gpt-3.5-turbo", max_token_
     return combined_summary
 
 
-# Read the file paths and word counts
+# Read the file paths and word counts from the CSV file
 file_data = read_csv(csv_file_path)
 # print("file_data:", file_data)
 
