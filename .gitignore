@@ -160,3 +160,4 @@ cython_debug/
 .idea/
 project_file_lists
 summary_outputs
+*.md
