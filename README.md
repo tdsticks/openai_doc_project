@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Open AI Doc Project is a tool designed to automate the documentation of software projects. Utilizing the Open AI API, this project simplifies the process of creating comprehensive Markdown documents for your entire project, along with generating an overall project summary.
+The Open AI Doc Project is a tool designed to automate the documentation of software projects. Utilizing the Open AI API, this project simplifies the process of creating comprehensive Markdown documents for your entire project, along with generating an overall final summary file of the entire director structure linking to each markdown file.
 
 ## Key Features
 
@@ -13,7 +13,6 @@ The Open AI Doc Project is a tool designed to automate the documentation of soft
 ## Future Enhancements
 
 - **Comprehensive Project Overview:** We plan to integrate a feature that compiles all individual summaries into a larger, overarching project summary. This will provide an even more detailed understanding of the project as a whole.
-- **Enhanced Navigation:** Future updates aim to organize all Markdown documentation into a structured file/folder format within the document. This will facilitate quick reference and improve the usability of the documentation.
 - **Platform Compatibility:** While currently optimized for MacOS, efforts are underway to ensure compatibility and efficiency across other operating systems like Windows and Linux.
 
 ## Disclaimer
