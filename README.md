@@ -12,6 +12,7 @@ The Open AI Doc Project is a tool designed to automate the documentation of soft
 
 ## Future Enhancements
 
+- Consolidate code into one file (classes and methods)
 - **Comprehensive Project Overview:** We plan to integrate a feature that compiles all individual summaries into a larger, overarching project summary. This will provide an even more detailed understanding of the project as a whole.
 - **Platform Compatibility:** While currently optimized for MacOS, efforts are underway to ensure compatibility and efficiency across other operating systems like Windows and Linux.
 
