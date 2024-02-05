@@ -1,6 +1,9 @@
 import os
 from openai import OpenAI
 import environ
+import itertools
+from pprint import pprint
+
 
 # Initialize environment and OpenAI client
 env = environ.Env()
@@ -10,11 +13,18 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 def list_markdown_files(directory):
     """List all markdown files in the directory."""
-    markdown_files = []
+    # markdown_files = []
+    markdown_files = {}
     for root, dirs, files in os.walk(directory):
+        md_files = []
         for file in files:
             if file.endswith(".md"):
-                markdown_files.append(os.path.join(root, file))
+                # markdown_files.append(os.path.join(root, file))
+                md_files.append(file)
+        if len(md_files) > 0:
+            rel_path = "/" + root.replace(directory, "")
+            # print(rel_path, md_files)
+            markdown_files[rel_path] = md_files
     return markdown_files
     
             
@@ -40,7 +50,7 @@ def chunk_text(text, chunk_size):
         yield text[i:i + chunk_size]
 
 
-def generate_summary_for_chunk(text, model="gpt-3.5-turbo", max_token_size=4096):
+# def generate_summary_for_chunk(text, model="gpt-3.5-turbo", max_token_size=4096):
     """
     Get a high-level summary of the text using OpenAI.
 
@@ -118,10 +128,51 @@ def generate_summary_for_chunk(text, model="gpt-3.5-turbo", max_token_size=4096)
     return combined_summary
 
 
-def create_project_summary(all_summary_files, p_openai_directory, p_summary_outputs_directory):
+def generate_tree(directory, files_dict, prefix=''):
+    print(":generate_tree:")
+    
+    tree_lines = []
+    
+    # Sort directories and files to ensure consistent order
+    items = files_dict[directory].items()
+    
+    # Loop through all the files and paths
+    for p, (path, files) in enumerate(items):
+        print(p, path, files)
+        
+        indent = ''  # Indentation based on directory depth
+        indent = path.count(os.sep) * '│   '  # Indentation based on directory depth
+        
+        # Special handling for root ('/') to avoid extra indentation
+        if path != '/':
+            tree_lines.append(f"{prefix}{indent}├── {os.path.basename(path)}/")
+            if p >= len(items)-1:
+                indent += '└    '
+            else:
+                indent += '│    '
+        
+        # Loop through all the files underneath the paths
+        for f, file in enumerate(sorted(files)):
+        # for f, file in enumerate(files):
+            # print(file)
+            # If its the last item, end the hierarchy
+            if f >= len(files)-1:
+                tree_lines.append(f"{prefix}{indent}└── {file}")
+            # Otherwise, keep the hierarching going
+            else:
+                tree_lines.append(f"{prefix}{indent}├── {file}")
+            
+    # pprint(tree_lines)
+    return tree_lines
+
+
+def create_project_summary(p_openai_directory, p_summary_outputs_directory, all_summary_files=None):
     """Create a project summary document."""
     print(":create_project_summary:")
-    project_summary_content = "# Comprehensive Project Summary\n\n"
+    project_summary_content = "# Project Summary\n\n"
+
+    # Add a project summary if you wish
+    # project_summary_content += "This prject is about..."
 
     # TODO: Pausing this feature for now. Need to rethink the approach into using Open AI for
     #  building a summary of the entire project from the summary files.
@@ -145,26 +196,44 @@ def create_project_summary(all_summary_files, p_openai_directory, p_summary_outp
     # print("full_summary_dir:", full_summary_dir)
 
     # Get list of markdown files and sort them
-    markdown_files = sorted(list_markdown_files(full_summary_dir))
-    # print("markdown_files:", markdown_files)
-
+    # markdown_files = sorted(list_markdown_files(full_summary_dir))
+    markdown_files = list_markdown_files(full_summary_dir)
+    # pprint(markdown_files)
+    
     # Organize files by directory structure
     organized_files = {}
-    for file in markdown_files:
-        directory = os.path.dirname(file)
-        if directory not in organized_files:
-            organized_files[directory] = []
-        organized_files[directory].append(file)
-    # print("organized_files:", organized_files)
-
-    # Display files in hierarchical order
+    organized_files[full_summary_dir] = markdown_files
+    # pprint(organized_files)
+    
+    # Generate directory tree for each top-level directory
+    # for directory in sorted(organized_files.keys()):
+    #     relative_dir = os.path.relpath(directory, p_summary_outputs_directory)
+    #     project_summary_content += f"\n<pre>\n{relative_dir}\n"
+    #     # TODO: This is where we loop through data and generate the Markdown data structure
+    #     tree_lines = ""
+    #     project_summary_content += "\n".join(tree_lines) + "\n</pre>\n"
+    
+     # Assuming organized_files is structured as shown in your data
     for directory, files in organized_files.items():
-        relative_dir = os.path.relpath(directory, p_summary_outputs_directory)
-        project_summary_content += f"### {relative_dir}\n"
-        for file in files:
-            relative_path = os.path.relpath(file, p_summary_outputs_directory)
-            file_name = os.path.basename(file)
-            project_summary_content += f"- [{file_name}]({relative_path})\n"
+        relative_dir = os.path.relpath(directory, p_openai_directory)  # Adjust based on actual usage
+        if relative_dir == '.':
+            relative_dir = '/'  # Adjusting root representation
+        
+        project_summary_content += f"'''\n{directory}\n"
+        
+        # Initialize an empty dictionary to hold filtered paths and files
+        filtered_files_dict = {}
+
+        # Iterate over each item in the organized_files dictionary
+        for sub_path, files in organized_files.items():
+            # Check if the current sub_path starts with the directory we're generating the tree for
+            if sub_path.startswith(directory):
+                # If it does, add it to the filtered dictionary
+                filtered_files_dict[sub_path] = files
+
+        # Now, pass the filtered dictionary to the generate_tree function
+        tree_lines = generate_tree(directory, filtered_files_dict, prefix='')
+        project_summary_content += "\n".join(tree_lines) + "\n'''\n"
 
     # Write the final project summary to a file
     full_final_project_summary = os.path.join(full_summary_dir, "FINAL_PROJECT_SUMMARY.md")
@@ -183,4 +252,5 @@ openai_directory = os.getcwd() + "/"
 # print("openai_directory:", openai_directory)
 
 summary_outputs_directory = "summary_outputs/"  # Set your project directory path
-create_project_summary(all_summary_file_list, openai_directory, summary_outputs_directory)
+# create_project_summary(openai_directory, summary_outputs_directory, all_summary_file_list)
+create_project_summary(openai_directory, summary_outputs_directory, None)
